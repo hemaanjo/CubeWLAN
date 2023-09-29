@@ -28,30 +28,13 @@
 #include "defines.h"
 #include "Credentials.h"
 #include "dynamicParams.h"
-
-#include <TinyGPSPlus.h>
-#include <SoftwareSerial.h>
+#include "shortcuts.h"
 
 //#include <BluetoothSerial.h>
 //#include <ESPAsync_WiFiManager_Lite.h>
 
 /*Bluetooth*/
 //BluetoothSerial SerialBT;
-
-/* GPS
-   This sample code demonstrates the normal use of a TinyGPSPlus (TinyGPSPlus) object.
-   It requires the use of SoftwareSerial, and assumes that you have a
-   4800-baud serial GPS device hooked up on pins 4(rx) and 3(tx).
-*/
-static const int RXPin = 16, TXPin = 17; //RXPin = 22, TXPin = 21;
-static const uint32_t GPSBaud = 4800;
-// The TinyGPSPlus object
-TinyGPSPlus gps;
-// The serial connection to the GPS device
-SoftwareSerial ss(RXPin, TXPin, true); //
-int start=0;
-String nmea ="OSM Logger---------------------------------------------------------------------------------------------------------------------------------------";
-
 
 /*WifiManager*/
 #define USE_DYNAMIC_PARAMETERS      false
@@ -79,6 +62,7 @@ AsyncWebSocket ws("/ws");
 // env variable for Rest API
 bool PowerBankState=0;
 
+
 /*Rest API*/
 StaticJsonDocument<250> jsonDocument;
 char DisplayTime[10];
@@ -103,7 +87,7 @@ void notFound(AsyncWebServerRequest *request)
   request->send(404, "application/json", "{\"message\":\"Not found\"}");
 }
 
-void getPowerbank() {
+void PowerBankState2Server() {
   create_json("powerbank",PowerBankState,"Toggle");
   //server.send(200, "application/json", buffer);
   server.on("/powerbank", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -112,234 +96,6 @@ void getPowerbank() {
   CUBEserver.on("/powerbank", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "application/json", buffer);  
   });
-}
-
-void setupgps() {
-  ss.begin(GPSBaud,SWSERIAL_8N1); //, SWSERIAL_8N1, RXPin, TXPin);
-
-  Serial.println(F("An extensive example of many interesting TinyGPSPlus features"));
-  Serial.print(F("Testing TinyGPSPlus library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
-  //Serial.println(F("by Mikal Hart"));
-  Serial.println();
-  Serial.println(F("Sats HDOP  Latitude   Longitude   Fix  Date       Time     Date Alt    Course Speed Card  Distance Course Card  Chars Sentences Checksum"));
-  Serial.println(F("           (deg)      (deg)       Age                      Age  (m)    --- from GPS ----  ---- to London  ----  RX    RX        Fail"));
-  Serial.println(F("----------------------------------------------------------------------------------------------------------------------------------------"));
-}
-
-void parsegps() {
-  static const double LONDON_LAT = 51.01847, LONDON_LON = 6.04530;
-  String gnss_data = "";
-
-  double longitude,latitude;
-  while (ss.available() >0 ) {
-    if ( gps.encode(ss.read()) ) {
-      displayInfo();
-      Serial.println("G");
-    }
-  }
-/*
-  if (millis() > 5000 && gps.charsProcessed() < 10)
-  {
-    Serial.println(F("No GPS detected: check wiring."));
-    while(true);
-  }
-
-*/
-/*
-  if (Serial.available()){
-    BT.write(Serial.read());
-  }
-
-  if(BT.available()){
-    Serial.write(BT.read());
-  }
-*/
-  if(gps.charsProcessed() >= 10) {
-    Serial.println();
-    printInt(gps.satellites.value(), gps.satellites.isValid(), 5);
-    printFloat(gps.hdop.hdop(), gps.hdop.isValid(), 6, 1);
-    printFloat(gps.location.lat(), gps.location.isValid(), 11, 6);
-    printFloat(gps.location.lng(), gps.location.isValid(), 12, 6);
-    printInt(gps.location.age(), gps.location.isValid(), 5);
-    printDateTime(gps.date, gps.time);
-    printFloat(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
-    printFloat(gps.course.deg(), gps.course.isValid(), 7, 2);
-    printFloat(gps.speed.kmph(), gps.speed.isValid(), 6, 2);
-    printStr(gps.course.isValid() ? TinyGPSPlus::cardinal(gps.course.deg()) : "*** ", 6);
-  
-    unsigned long distanceKmToLondon =
-      (unsigned long)TinyGPSPlus::distanceBetween(
-        gps.location.lat(),
-        gps.location.lng(),
-        LONDON_LAT, 
-        LONDON_LON) / 1000;
-    printInt(distanceKmToLondon, gps.location.isValid(), 9);
-
-    double courseToLondon =
-      TinyGPSPlus::courseTo(
-        gps.location.lat(),
-        gps.location.lng(),
-        LONDON_LAT, 
-        LONDON_LON);
-
-    printFloat(courseToLondon, gps.location.isValid(), 7, 2);
-
-    const char *cardinalToLondon = TinyGPSPlus::cardinal(courseToLondon);
-
-    printStr(gps.location.isValid() ? cardinalToLondon : "*** ", 6);
-
-    printInt(gps.charsProcessed(), true, 6);
-    printInt(gps.sentencesWithFix(), true, 10);
-    printInt(gps.failedChecksum(), true, 9);
-    Serial.println();
-  
-    smartDelay(1000);
-
-    if (millis() > 5000 && gps.charsProcessed() < 10)
-      Serial.println(F("No GPS data received: check wiring"));
-  }
-/*
-  else
-  {
-    if strlen(gnss_data>0){
-      Serial.printf("%s\n", gnss_data);
-    }
-  }
-*/
-}
-
-// This custom version of delay() ensures that the gps object
-// is being "fed".
-static void smartDelay(unsigned long ms)
-{
-  unsigned long start = millis();
-  do 
-  {
-    while (ss.available())
-      gps.encode(ss.read());
-  } while (millis() - start < ms);
-}
-
-static void printFloat(float val, bool valid, int len, int prec)
-{
-  bool valiide=true;
-  if (!valid)
-  {
-    while (len-- > 1)
-      Serial.print('*');
-    Serial.print(' ');
-  }
-  else
-  {
-    Serial.print(val, prec);
-    int vi = abs((int)val);
-    int flen = prec + (val < 0.0 ? 2 : 1); // . and -
-    flen += vi >= 1000 ? 4 : vi >= 100 ? 3 : vi >= 10 ? 2 : 1;
-    for (int i=flen; i<len; ++i)
-      Serial.print(' ');
-  }
-  smartDelay(0);
-}
-
-static void printInt(unsigned long val, bool valid, int len)
-{
-  char sz[32] = "*****************";
-  if (valid)
-    sprintf(sz, "%ld", val);
-  sz[len] = 0;
-  for (int i=strlen(sz); i<len; ++i)
-    sz[i] = ' ';
-  if (len > 0) 
-    sz[len-1] = ' ';
-  Serial.print(sz);
-  smartDelay(0);
-}
-
-static void printDateTime(TinyGPSDate &d, TinyGPSTime &t)
-{
-  if (!d.isValid())
-  {
-    Serial.print(F("********** "));
-  }
-  else
-  {
-    char sz[32];
-    sprintf(sz, "%02d/%02d/%02d ", d.month(), d.day(), d.year());
-    Serial.print(sz);
-  }
-  
-  if (!t.isValid())
-  {
-    Serial.print(F("******** "));
-  }
-  else
-  {
-    char sz[32];
-    sprintf(sz, "%02d:%02d:%02d ", t.hour(), t.minute(), t.second());
-    Serial.print(sz);
-  }
-
-  printInt(d.age(), d.isValid(), 5);
-  smartDelay(0);
-}
-
-static void printStr(const char *str, int len)
-{
-  int slen = strlen(str);
-  for (int i=0; i<len; ++i)
-    Serial.print(i<slen ? str[i] : ' ');
-  smartDelay(0);
-}
-
-void displayInfo()
-{
-  Serial.print(F("Location: ")); 
-  if (gps.location.isValid())
-  {
-    Serial.print(gps.location.lat(), 6);
-    Serial.print(F(","));
-    Serial.print(gps.location.lng(), 6);
-  }
-  else
-  {
-    Serial.print(F("INVALID"));
-  }
-
-  Serial.print(F("  Date/Time: "));
-  if (gps.date.isValid())
-  {
-    Serial.print(gps.date.month());
-    Serial.print(F("/"));
-    Serial.print(gps.date.day());
-    Serial.print(F("/"));
-    Serial.print(gps.date.year());
-  }
-  else
-  {
-    Serial.print(F("INVALID"));
-  }
-
-  Serial.print(F(" "));
-  if (gps.time.isValid())
-  {
-  if (gps.time.hour() < 10) Serial.print(F("0"));
-    Serial.print(gps.time.hour());
-    Serial.print(F(":"));
-    if (gps.time.minute() < 10) Serial.print(F("0"));
-    Serial.print(gps.time.minute());
-    Serial.print(F(":"));
-    if (gps.time.second() < 10) Serial.print(F("0"));
-    Serial.print(gps.time.second());
-    Serial.print(F("."));
-    if (gps.time.centisecond() < 10) Serial.print(F("0"));
-    Serial.print(gps.time.centisecond());
-  }
-  else
-  {
-    Serial.print(F("INVALID"));
-  }
-
-  Serial.println();
 }
 
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
@@ -361,13 +117,17 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
 }
 
 void setup_routing() {
-  //server.on("/Powerbank", getPowerbank);
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "application/json", "{\"powerbank\":\"Welcome\"}");
   });
   CUBEserver.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(200, "application/json", "{\"powerbank\":\"Welcome\"}");
   });
+
+  server.on("/get-shortcuts", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "application/zip", (const char*)shortcuts_zip);
+  });
+
 
   server.on("/get-message", HTTP_GET, [](AsyncWebServerRequest *request) {
     StaticJsonDocument<100> data;
@@ -442,7 +202,7 @@ void setup_routing() {
   //CUBEserver.addHandler(&ws);
   server.onNotFound(notFound);
   CUBEserver.onNotFound(notFound);
-  getPowerbank();
+  PowerBankState2Server();
 }
 
 
@@ -470,7 +230,7 @@ void setRelais(bool state) {
 
 void setPowerbank(bool state) {
   PowerBankState=state;
-  getPowerbank();
+  PowerBankState2Server();
   if(PowerBankState) {
     Serial.printf("Powerbank: An\n");
     digitalWrite(RELAIS,HIGH);
@@ -570,7 +330,8 @@ void setupNTP() {
 
 void setupRELAIS() {
   pinMode(RELAIS,OUTPUT);
-  PowerBankState=0;
+  PowerBankState=digitalRead(RELAIS);
+  Serial.printf("Relais nacheinschalten=%d\n",PowerBankState);
   setPowerbank(PowerBankState);
 }
 
@@ -634,9 +395,6 @@ if(numSsid!=0) {
 void heartBeatPrint()
 {
   static int num = 1;
-  
-  
-
   if (WiFi.status() == WL_CONNECTED) {
     //Serial.print("H");        // H means connected to WiFi
     Serial.printf("%s -> %s...%s",ESPAsync_WiFiManager->localIP(),WiFi.SSID(),"AP-IP=");
@@ -703,12 +461,10 @@ void setup() {
   setupOTA();
   setupNTP();
   setupRELAIS();
-  //setupgps();
 }
 
 void loop() {
   cMillis = millis();
-  //parsegps();  
   ESPAsync_WiFiManager->run();
   check_status();
   /*if (SerialBT.available()) {

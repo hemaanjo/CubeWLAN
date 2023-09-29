@@ -1,0 +1,137 @@
+{
+  "categories": [
+    {
+      "background": "color\u003d#55B59F",
+      "id": "01280eca-6d59-4118-943e-28db27524c13",
+      "name": "Routinen",
+      "shortcuts": [
+        {
+          "codeOnPrepare": "\n\n",
+          "codeOnSuccess": "setVariable(/*[variable]*/\"ba07525d-5de7-4c92-bd15-83242ccb810d\"/*[/variable]*/, JSON.parse(response.body).value);\nv\u003dgetVariable(/*[variable]*/\"ba07525d-5de7-4c92-bd15-83242ccb810d\"/*[/variable]*/);\nif (v\u003d\u003d\"0\") {\n   t\u003d\"nicht\";\n} else {\n   t\u003d\"\";\n}\nspeak(\"Pauerbänk wird \" + t + \"geladen\");\n\n",
+          "iconName": "flat_color_megaphone",
+          "id": "2a3f05e7-6fe7-4d51-928e-65aeaa4f4f62",
+          "name": "GetPowerbank",
+          "responseHandling": {
+            "failureOutput": "none",
+            "successOutput": "none",
+            "uiType": "toast"
+          },
+          "url": "http://{{6742337b-5a26-44fb-87da-4ea446d04ddb}}/powerbank"
+        },
+        {
+          "bodyContent": "{\n  \"powerbank\":0\n}",
+          "codeOnPrepare": "executeShortcut(/*[shortcut]*/\"cdcd2296-b1d5-4f1d-9d99-6a2fe640a69d\"/*[/shortcut]*/);\n\n",
+          "contentType": "application/json",
+          "iconName": "flat_color_batterylow",
+          "id": "cb6e29b7-aaf8-4be2-8915-bb4364083e03",
+          "method": "POST",
+          "name": "PowerbankAus",
+          "responseHandling": {
+            "failureOutput": "none",
+            "successOutput": "none"
+          },
+          "url": "http://{{6742337b-5a26-44fb-87da-4ea446d04ddb}}/powerbank"
+        },
+        {
+          "bodyContent": "{\n  \"powerbank\": 1\n}",
+          "codeOnPrepare": "executeShortcut(/*[shortcut]*/\"cdcd2296-b1d5-4f1d-9d99-6a2fe640a69d\"/*[/shortcut]*/);\n\n",
+          "contentType": "application/json",
+          "iconName": "flat_color_batteryfull",
+          "id": "a5946155-f93f-4280-a7a8-1055200578a1",
+          "method": "POST",
+          "name": "PowerbankAn",
+          "responseHandling": {
+            "includeMetaInfo": true,
+            "successOutput": "none",
+            "uiType": "toast"
+          },
+          "url": "http://{{6742337b-5a26-44fb-87da-4ea446d04ddb}}/powerbank"
+        },
+        {
+          "codeOnPrepare": "cval\u003dgetVariable(/*[variable]*/\"ba07525d-5de7-4c92-bd15-83242ccb810d\"/*[/variable]*/);\nif(cval\u003d\u003d\"1\") {cval\u003d\"0\";} else {cval\u003d\"1\";};\nsetVariable(/*[variable]*/\"ba07525d-5de7-4c92-bd15-83242ccb810d\"/*[/variable]*/, cval);\nexecuteShortcut(/*[shortcut]*/\"8cb0e047-c65b-4a30-b7f9-c61d6a504157\"/*[/shortcut]*/);\nexecuteShortcut(/*[shortcut]*/\"5e906783-ca64-45d6-a3b1-a08063951c57\"/*[/shortcut]*/);\nexecuteShortcut(/*[shortcut]*/\"2a3f05e7-6fe7-4d51-928e-65aeaa4f4f62\"/*[/shortcut]*/);\n\n\n",
+          "executionType": "scripting",
+          "iconName": "flat_color_cursor",
+          "id": "087bfeb3-8163-4512-9969-003e1e825fce",
+          "name": "toggle"
+        }
+      ]
+    },
+    {
+      "background": "color\u003d#000000",
+      "id": "a235fb9f-4acf-4ddf-998a-87c852c5a574",
+      "name": "subroutines",
+      "shortcuts": [
+        {
+          "codeOnPrepare": "ipok \u003d false;\ncubeips \u003d getVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/).split(\"\\n\");\nsetVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/, getWifiSSID(),true);\n//speak(getVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/)\u003d\u003d\"Cube\");\nif (getVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/)\u003d\u003d\"Cube\") {\n ipStr\u003dgetWifiIPAddress().split(\".\");\n setVariable(/*[variable]*/\"6742337b-5a26-44fb-87da-4ea446d04ddb\"/*[/variable]*/, ipStr[0] +\".\" + ipStr[1] + \".\" + ipStr[2] + \".1\", true);\nipok\u003dtrue;\n } else {\n for(i\u003d0;i\u003ccubeips.length;i++) {\n  if(!ipok) {\n   iprec\u003dcubeips[i].split(\",\");\n   if (getVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/)\u003d\u003diprec[0]) {\n    setVariable(/*[variable]*/\"6742337b-5a26-44fb-87da-4ea446d04ddb\"/*[/variable]*/, iprec[1],true);\n    ipok\u003dtrue;\n   };\n  };\n };\n}; \n\n//TEST\nif (!ipok) {\n showToast(getWifiSSID());\n speak(\" für das WLan \" + getWifiSSID()    + \" ist keine \u0027Cjub\u0027 IP vorhanden!\");\n wlansstr\u003d\"\";\n for(i\u003d0;i\u003ccubeips.length;i++) {\n  wlansstr+\u003dcubeips[i]+\"\\n\";\n };\n wlansstr+\u003dgetWifiSSID()+\",127.0.0.1\\n\";\nsetVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/, wlansstr,true);\n};\n",
+          "executionType": "scripting",
+          "iconName": "flat_color_bike",
+          "id": "cdcd2296-b1d5-4f1d-9d99-6a2fe640a69d",
+          "name": "setCubeVars(sr)"
+        },
+        {
+          "codeOnPrepare": "vorlage\u003dgetVariable(/*[variable]*/\"8d5eaca0-4d6e-4602-8b5d-d53c70792d20\"/*[/variable]*/);\nvorlage\u003dvorlage.replace(\"\u003cvalue\u003e\",getVariable(/*[variable]*/\"ba07525d-5de7-4c92-bd15-83242ccb810d\"/*[/variable]*/));\nsetVariable(/*[variable]*/\"ce41f49e-cd50-432c-abac-06f6def6bfa1\"/*[/variable]*/,vorlage,true);",
+          "executionType": "scripting",
+          "iconName": "flat_color_lightbulb",
+          "id": "8cb0e047-c65b-4a30-b7f9-c61d6a504157",
+          "name": "setPOST4Powerbank(sr)",
+          "url": ""
+        },
+        {
+          "bodyContent": "{{ce41f49e-cd50-432c-abac-06f6def6bfa1}}",
+          "codeOnPrepare": "//setVariable(/*[variable]*/\"ba07525d-5de7-4c92-bd15-83242ccb810d\"/*[/variable]*/, \"1\");\nexecuteShortcut(/*[shortcut]*/\"8cb0e047-c65b-4a30-b7f9-c61d6a504157\"/*[/shortcut]*/);\n\n",
+          "contentType": "application/json",
+          "iconName": "flat_color_batteryfull",
+          "id": "5e906783-ca64-45d6-a3b1-a08063951c57",
+          "method": "POST",
+          "name": "PowerbankPOST(sr)",
+          "responseHandling": {
+            "includeMetaInfo": true,
+            "successOutput": "none",
+            "uiType": "toast"
+          },
+          "url": "http://{{6742337b-5a26-44fb-87da-4ea446d04ddb}}/powerbank"
+        }
+      ]
+    }
+  ],
+  "compatibilityVersion": 71,
+  "globalCode": "//",
+  "variables": [
+    {
+      "id": "6742337b-5a26-44fb-87da-4ea446d04ddb",
+      "key": "CUBEip",
+      "value": "10.80.0.104"
+    },
+    {
+      "flags": 1,
+      "id": "4367d0f1-c0b6-4b7d-80d1-8b6271206355",
+      "key": "ssid",
+      "value": "Stahlbau Trepels"
+    },
+    {
+      "flags": 1,
+      "id": "240fb907-09a6-405c-aa58-d3f99e770ffb",
+      "key": "wlans",
+      "value": "\n"
+    },
+    {
+      "flags": 1,
+      "id": "ba07525d-5de7-4c92-bd15-83242ccb810d",
+      "key": "ToggleLogic",
+      "value": "1"
+    },
+    {
+      "flags": 1,
+      "id": "8d5eaca0-4d6e-4602-8b5d-d53c70792d20",
+      "key": "JSON_SET_Powerbank",
+      "value": "{\n  \"powerbank\":\u003cvalue\u003e\n}"
+    },
+    {
+      "flags": 1,
+      "id": "ce41f49e-cd50-432c-abac-06f6def6bfa1",
+      "key": "PBPOST",
+      "value": "{\n  \"powerbank\":1\n}"
+    }
+  ],
+  "version": 71
+}
