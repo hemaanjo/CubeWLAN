@@ -125,7 +125,7 @@ void setup_routing() {
   });
 
   server.on("/get-shortcuts", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "application/zip", (const char*)shortcuts_zip);
+    request->send(200, "application/json", (const char*)shortcuts_zip);
   });
 
 
