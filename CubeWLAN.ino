@@ -125,9 +125,26 @@ void setup_routing() {
   });
 
   server.on("/get-shortcuts", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "application/json", (const char*)shortcuts_zip);
+    AsyncWebServerResponse *response = request->beginResponse_P(200, "application/zip",shortcuts_zip,shortcuts_zip_len);
+    response->addHeader("Content-Encoding", "zip");
+    request->send(response);
   });
 
+/*  server.on("/get-jsshortcuts", HTTP_GET, [](AsyncWebServerRequest *request) {
+    AsyncWebServerResponse *response = request->beginResponse_P(200, "application/zip",shortcuts_zip,shortcuts_zip_len);
+    response->addHeader("Content-Encoding", "zip");
+    request->beginResponseStream(const String &contentType)
+    request->send(response);
+  });
+*/
+  server.on("/get-ip", HTTP_GET, [](AsyncWebServerRequest *request) {
+    jsonDocument.clear();
+    jsonDocument["type"] = "WLAN";
+    jsonDocument["value"] = ESPAsync_WiFiManager->localIP();
+    jsonDocument["SSID"] = WiFi.SSID();
+    serializeJson(jsonDocument, buffer);  
+    request->send(200, "application/json", buffer);  
+  });
 
   server.on("/get-message", HTTP_GET, [](AsyncWebServerRequest *request) {
     StaticJsonDocument<100> data;
@@ -467,6 +484,9 @@ void loop() {
   cMillis = millis();
   ESPAsync_WiFiManager->run();
   check_status();
+  if (CUBEclient.connect(host,80)) {
+    Serial.println("CLIENT!!!");
+  }
   /*if (SerialBT.available()) {
     Serial.write(SerialBT.read());
   }*/

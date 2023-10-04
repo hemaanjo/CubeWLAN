@@ -6,6 +6,7 @@
       "name": "Routinen",
       "shortcuts": [
         {
+          "codeOnFailure": "executeShortcut(/*[shortcut]*/\"7c099bf6-689c-4a71-ad00-412e5f2b8a49\"/*[/shortcut]*/);\n",
           "codeOnPrepare": "\n\n",
           "codeOnSuccess": "setVariable(/*[variable]*/\"ba07525d-5de7-4c92-bd15-83242ccb810d\"/*[/variable]*/, JSON.parse(response.body).value);\nv\u003dgetVariable(/*[variable]*/\"ba07525d-5de7-4c92-bd15-83242ccb810d\"/*[/variable]*/);\nif (v\u003d\u003d\"0\") {\n   t\u003d\"nicht\";\n} else {\n   t\u003d\"\";\n}\nspeak(\"Pauerbänk wird \" + t + \"geladen\");\n\n",
           "iconName": "flat_color_megaphone",
@@ -62,11 +63,32 @@
       "name": "subroutines",
       "shortcuts": [
         {
-          "codeOnPrepare": "ipok \u003d false;\ncubeips \u003d getVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/).split(\"\\n\");\nsetVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/, getWifiSSID(),true);\n//speak(getVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/)\u003d\u003d\"Cube\");\nif (getVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/)\u003d\u003d\"Cube\") {\n ipStr\u003dgetWifiIPAddress().split(\".\");\n setVariable(/*[variable]*/\"6742337b-5a26-44fb-87da-4ea446d04ddb\"/*[/variable]*/, ipStr[0] +\".\" + ipStr[1] + \".\" + ipStr[2] + \".1\", true);\nipok\u003dtrue;\n } else {\n for(i\u003d0;i\u003ccubeips.length;i++) {\n  if(!ipok) {\n   iprec\u003dcubeips[i].split(\",\");\n   if (getVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/)\u003d\u003diprec[0]) {\n    setVariable(/*[variable]*/\"6742337b-5a26-44fb-87da-4ea446d04ddb\"/*[/variable]*/, iprec[1],true);\n    ipok\u003dtrue;\n   };\n  };\n };\n}; \n\n//TEST\nif (!ipok) {\n showToast(getWifiSSID());\n speak(\" für das WLan \" + getWifiSSID()    + \" ist keine \u0027Cjub\u0027 IP vorhanden!\");\n wlansstr\u003d\"\";\n for(i\u003d0;i\u003ccubeips.length;i++) {\n  wlansstr+\u003dcubeips[i]+\"\\n\";\n };\n wlansstr+\u003dgetWifiSSID()+\",127.0.0.1\\n\";\nsetVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/, wlansstr,true);\n};\n",
+          "codeOnPrepare": "while(getWifiSSID()!\u003d\"Cube\") {\nshowDialog(\u0027Bitte mit CJUBE WLAN verbinden!\u0027, \u0027get Current IP\u0027);\n};\n",
+          "codeOnSuccess": "ip\u003dJSON.parse(response.body).value;\nssid\u003dJSON.parse(response.body).SSID;\nsetVariable(/*[variable]*/\"cdc21dc1-b270-4d6b-80a5-0b030113875f\"/*[/variable]*/,ssid+\",\"+ip,true);\nwlansstr\u003dgetVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/);\nwlansstr+\u003d\"\\n\"+ssid+\",\"+ip;\nshowDialog(wlansstr, \"wlans\");\nsetVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/, wlansstr,true);\n",
+          "iconName": "flat_color_globe",
+          "id": "7c099bf6-689c-4a71-ad00-412e5f2b8a49",
+          "name": "getIP(sr)",
+          "responseHandling": {
+            "failureOutput": "none",
+            "successOutput": "none",
+            "uiType": "toast"
+          },
+          "url": "http://192.158.17.1/get-ip"
+        },
+        {
+          "codeOnPrepare": "ipok \u003d false;\ncubeips \u003d getVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/).split(\"\\n\");\nsetVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/, getWifiSSID(),true);\n//speak(getVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/)\u003d\u003d\"Cube\");\nif (getVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/)\u003d\u003d\"Cube\") {\n ipStr\u003dgetWifiIPAddress().split(\".\");\n setVariable(/*[variable]*/\"6742337b-5a26-44fb-87da-4ea446d04ddb\"/*[/variable]*/, ipStr[0] +\".\" + ipStr[1] + \".\" + ipStr[2] + \".1\", true);\nipok\u003dtrue;\n } else {\n for(i\u003d0;i\u003ccubeips.length;i++) {\n  if(!ipok) {\n   iprec\u003dcubeips[i].split(\",\");\n   if (getVariable(/*[variable]*/\"4367d0f1-c0b6-4b7d-80d1-8b6271206355\"/*[/variable]*/)\u003d\u003diprec[0]) {\n    setVariable(/*[variable]*/\"6742337b-5a26-44fb-87da-4ea446d04ddb\"/*[/variable]*/, iprec[1],true);\n    ipok\u003dtrue;\n   };\n  };\n };\n}; \n\n//TEST\nif (!ipok) {\n showToast(getWifiSSID());\n speak(\" für das WLan \" + getWifiSSID()    + \" ist keine \u0027Cjub\u0027 IP vorhanden!\");\n speak(\"Verbindung zu Cjube WLAN aufbauen um IP-Adresse auszulesen\");\n// wlansstr\u003d\"\";\n// for(i\u003d0;i\u003ccubeips.length;i++) {\n//  wlansstr+\u003dcubeips[i]+\"\\n\";\n// };\n //wlansstr+\u003dgetWifiSSID()+\",127.0.0.1\\n\";\n//setVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/, wlansstr,true);\n//};\nexecuteShortcut(/*[shortcut]*/\"7c099bf6-689c-4a71-ad00-412e5f2b8a49\"/*[/shortcut]*/);\n};\n\n",
           "executionType": "scripting",
           "iconName": "flat_color_bike",
           "id": "cdcd2296-b1d5-4f1d-9d99-6a2fe640a69d",
           "name": "setCubeVars(sr)"
+        },
+        {
+          "codeOnPrepare": "showDialog(getVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/),\"wlans vorher\");\nisNewSSID \u003d false;\ncubeips \u003d getVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/).split(\"\\n\");\nfndSSID \u003d getVariable(/*[variable]*/\"cdc21dc1-b270-4d6b-80a5-0b030113875f\"/*[/variable]*/).split(\",\");\nwlansstr\u003d\"\";\nfor(i\u003d0;i\u003ccubeips.length;i++) {\n cWLAN \u003d cubeips[i].split(\",\");\n if (cWLAN[0]\u003d\u003dfndSSID[0]) {\n  /* foundSSID ist schon in wlans vorhanden - es wird nur die IP aktualisiert*/\n  wlansstr+\u003dfndSSID[0]+\",\"+fndSSID[1]+\"\\n\"\n } else {\n  wlansstr+\u003dcubeips[i]+\"\\n\";\n };\n};\nsetVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/,wlansstr,true);\nshowDialog(getVariable(/*[variable]*/\"240fb907-09a6-405c-aa58-d3f99e770ffb\"/*[/variable]*/),\"wlans nachher\");\n",
+          "description": "aktualisiert/ergänzt WLANS um die aktuelle SSID und deren IP in der Variablen foundSSID - Verwendung in getIP(sr)",
+          "executionType": "scripting",
+          "iconName": "flat_color_tools",
+          "id": "154ecfad-e20b-4318-bfcb-7491afe56e29",
+          "name": "setWLANS(sr)"
         },
         {
           "codeOnPrepare": "vorlage\u003dgetVariable(/*[variable]*/\"8d5eaca0-4d6e-4602-8b5d-d53c70792d20\"/*[/variable]*/);\nvorlage\u003dvorlage.replace(\"\u003cvalue\u003e\",getVariable(/*[variable]*/\"ba07525d-5de7-4c92-bd15-83242ccb810d\"/*[/variable]*/));\nsetVariable(/*[variable]*/\"ce41f49e-cd50-432c-abac-06f6def6bfa1\"/*[/variable]*/,vorlage,true);",
@@ -98,21 +120,22 @@
   "globalCode": "//",
   "variables": [
     {
+      "flags": 1,
       "id": "6742337b-5a26-44fb-87da-4ea446d04ddb",
       "key": "CUBEip",
-      "value": "10.80.0.104"
+      "value": "10.80.0.108"
     },
     {
       "flags": 1,
       "id": "4367d0f1-c0b6-4b7d-80d1-8b6271206355",
       "key": "ssid",
-      "value": "Stahlbau Trepels"
+      "value": ""
     },
     {
       "flags": 1,
       "id": "240fb907-09a6-405c-aa58-d3f99e770ffb",
       "key": "wlans",
-      "value": "\n"
+      "value": ""
     },
     {
       "flags": 1,
@@ -131,6 +154,12 @@
       "id": "ce41f49e-cd50-432c-abac-06f6def6bfa1",
       "key": "PBPOST",
       "value": "{\n  \"powerbank\":1\n}"
+    },
+    {
+      "flags": 1,
+      "id": "cdc21dc1-b270-4d6b-80a5-0b030113875f",
+      "key": "foundSSID",
+      "value": "B600IT,10.80.0.108"
     }
   ],
   "version": 71
